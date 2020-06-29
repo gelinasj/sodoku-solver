@@ -21,10 +21,10 @@ unparseBoard gb = unparseBoardWrap (getNext gb) boardTemplateString []
 
 unparseBoardWrap ::  Maybe (Cell, Gameboard) -> [Char] -> [Char] -> [Char]
 unparseBoardWrap Nothing restStr strAcc = (reverse strAcc) ++ restStr
-unparseBoardWrap (Just (cell,restGb)) ('@':restStr) strAcc =
-    unparseBoardWrap (getNext restGb) restStr (unparseCell cell):strAcc
+unparseBoardWrap (Just (cell,itr)) ('@':restStr) strAcc =
+    unparseBoardWrap (getNext itr) restStr ((unparseCell cell):strAcc)
 unparseBoardWrap itr (char:restStr) strAcc =
-    unparseBoardWrap itr restStr char:strAcc
+    unparseBoardWrap itr restStr (char:strAcc)
 
 getNext :: Gameboard -> Maybe (Cell, Gameboard)
 getNext [] = Nothing
@@ -37,24 +37,16 @@ unparseCell (Value num) = head (show num)
 
 
 boardTemplateString = "\
-\-------------------------------------------\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|-----------------------------------------|\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|-----------------------------------------|\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
-\|  @   @   @  |  @   @   @  |  @   @   @  |\
+\-------------------------------------------\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|-----------------------------------------|\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|-----------------------------------------|\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
+\|  @   @   @  |  @   @   @  |  @   @   @  |\n\
 \-------------------------------------------"
-
-
--- instance Show Gameboard where
---     show gb =
--- ()
--- where cells = [(read [char] :: Cell) |
---                     char <- gameboardStr,
---                     elem char ('_':['1'..'9'])]
