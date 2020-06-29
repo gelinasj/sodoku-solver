@@ -6,6 +6,7 @@ import Solver
 
 main :: IO ()
 main = do
+    putStrLn "Starting to solve"
     inputString <- readFile "UnsolvedGame.txt"
     let inputBoard = parseBoard inputString
         outputBoard = solve inputBoard
