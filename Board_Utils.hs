@@ -13,6 +13,7 @@ module Board_Utils
 , setUnion
 , getCellOfOptionSize
 , potentialMoves
+, checkSolution
 ) where
 import Data.List
 import Sodoku_Lang
@@ -29,6 +30,16 @@ replaceCellCol :: Row -> Position -> Position -> Cell -> Row
 replaceCellCol (col:rest) currPosn@(Posn currRow currCol) repPosn@(Posn _ repCol) newCell
     | currCol == repCol = (newCell:rest)
     | otherwise = (col:(replaceCellCol rest (Posn currRow (currCol + 1)) repPosn newCell))
+
+checkSolution :: Gameboard -> Bool
+checkSolution gb = all correctlySolvedVecs [0..8]
+    where correctlySolvedVecs :: Int -> Bool
+          correctlySolvedVecs index =
+              (noDups row) && (noDups col) && (noDups box)
+              where row = getRow gb index
+                    col = getCol gb index
+                    box = concat (getBox gb (div index 3) (mod index 3))
+                    noDups vec = (length (rmdups vec)) == (length vec)
 
 gameSolved :: Gameboard -> Bool
 gameSolved gb = all isAnswer (concat gb)

@@ -2,6 +2,7 @@ module Main where
 import System.IO
 import Parse_Unparse
 import Sodoku_Lang
+import Board_Utils
 import Solver
 
 main :: IO ()
@@ -10,5 +11,8 @@ main = do
     inputString <- readFile "UnsolvedGame.txt"
     let inputBoard = parseBoard inputString
         outputBoard = solve inputBoard
+        correctlySolved = checkSolution outputBoard
         outputString = unparseBoard outputBoard
-    writeFile "SolvedGame.txt" outputString
+    do
+        putStrLn ("Solution is " ++ (if correctlySolved then "correct" else "incorrect"))
+        writeFile "SolvedGame.txt" outputString
