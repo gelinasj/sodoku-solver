@@ -11,7 +11,10 @@ module Board_Utils
 , replaceCell
 , sodokuSetComplement
 , setUnion
+, getCellOfOptionSize
+, potentialMoves
 ) where
+import Data.List
 import Sodoku_Lang
 
 replaceCell :: Gameboard -> Position -> Cell -> Gameboard
@@ -33,10 +36,22 @@ gameSolved gb = all isAnswer (concat gb)
           isAnswer (Answer _) = True
           isAnswer _ = False
 
+potentialMoves :: Gameboard -> Bool
+potentialMoves gb = all optionHasMove (initIterator gb)
+    where optionHasMove :: (Cell, Position) -> Bool
+          optionHasMove ((Options freeSet), _) = (length freeSet) > 0
+          optionHasMove _ = True
+
 initIterator :: Gameboard -> GameboardIterator
 initIterator gb = [(getCell gb pos, pos) | row <- [0..8],
                                            col <- [0..8],
                                            let pos = Posn row col]
+
+getCellOfOptionSize :: Gameboard -> Int -> Maybe (Cell, Position)
+getCellOfOptionSize gb optionSize = find matchesSize (initIterator gb)
+    where matchesSize :: (Cell, Position) -> Bool
+          matchesSize ((Options freeSet), _) = (length freeSet) == optionSize
+          matchesSize _ = False
 
 getRow :: Gameboard -> Int -> Row
 getRow gb rowNum = gb !! rowNum

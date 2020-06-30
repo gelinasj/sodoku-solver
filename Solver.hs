@@ -9,13 +9,41 @@ import Parse_Unparse
 import Strategies as Sodoku
 
 solve :: Gameboard -> Gameboard
-solve = doWhile 100 (not . gameSolved) (runStrategies . updateFreeSets)
+solve = whileDo playable updateGameState
 
-doWhile :: Int -> (a -> Bool) -> (a -> a) -> a -> a
-doWhile count predicate action state =
-    if (predicate state && count > 0)
-        then doWhile (count - 1) predicate action (action state)
+playable :: Gameboard -> Bool
+playable gb = (not . gameSolved) gb && potentialMoves gb
+
+whileDo :: (a -> Bool) -> (a -> a) -> a -> a
+whileDo predicate action state =
+    if (predicate state)
+        then whileDo predicate action (action state)
         else state
+
+updateGameState :: Gameboard -> Gameboard
+updateGameState gb = if gb /= gb'
+                        then gb'
+                        else exploreOptions gb' 1
+    where gb' = (runStrategies . updateFreeSets) gb
+
+exploreOptions :: Gameboard -> Int -> Gameboard
+exploreOptions gb optionSize =
+    case maybeOption of
+        (Just ((Options freeSet), posn)) ->
+            determineCorrectOption gb freeSet posn
+        Nothing -> exploreOptions gb (optionSize + 1)
+    where maybeOption = getCellOfOptionSize gb optionSize
+
+determineCorrectOption :: Gameboard -> FreeSet -> Position -> Gameboard
+determineCorrectOption gb freeSet posn =
+    exploreOption 0
+    where exploreOption :: Int -> Gameboard
+          exploreOption optionIndex =
+              if gameSolved gb'
+                  then gb'
+                  else exploreOption (optionIndex + 1)
+              where newCell = Answer (freeSet !! optionIndex)
+                    gb' = solve (replaceCell gb posn newCell)
 
 updateFreeSets :: Gameboard -> Gameboard
 updateFreeSets gb = foldl updateFreeSet gb itr

@@ -10,7 +10,7 @@ import Sodoku_Lang
 import Board_Utils
 
 strategies = map strategyWrapper unwrappedStrategies
-unwrappedStrategies = [onlyChoice, checkRow, checkCol, checkBox]
+unwrappedStrategies = [checkRow, checkCol, checkBox]
 
 strategyWrapper :: Strategy -> Strategy
 strategyWrapper strat =
@@ -18,9 +18,9 @@ strategyWrapper strat =
         (Answer _) -> cell
         (Options _) -> strat gb cell posn)
 
-onlyChoice :: Strategy
-onlyChoice gb (Options [answer]) posn = Answer answer
-onlyChoice gb oldCell posn = oldCell
+-- onlyChoice :: Strategy
+-- onlyChoice gb (Options [answer]) posn = Answer answer
+-- onlyChoice gb oldCell posn = oldCell
 
 checkRow :: Strategy
 checkRow gb oldCell posn@(Posn rowNum _) =
