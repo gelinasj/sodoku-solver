@@ -8,6 +8,7 @@ module Sodoku_Lang
 , FreeSet
 , UsedSet
 , GameboardIterator
+, Strategy
 ) where
 
 -- | Represents a set of unused values
@@ -35,7 +36,10 @@ type Gameboard = [Row]
 -- |Represents a cell position on the gameboard
 data Position = Posn { row :: Int
                      , column :: Int
-                     } deriving(Show)
+                     } deriving(Show, Eq)
 
 -- |Represents the iteration across the cells of a gameboard
 type GameboardIterator = [(Cell, Position)]
+
+-- |Represents a strategy for finding an answer
+type Strategy = Gameboard -> Cell -> Position -> Cell

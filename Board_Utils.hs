@@ -9,15 +9,23 @@ module Board_Utils
 , setIntersect
 , gameSolved
 , replaceCell
+, sodokuSetComplement
+, setUnion
 ) where
 import Sodoku_Lang
 
-replaceCell :: Gameboard -> Cell -> Cell -> Gameboard
-replaceCell gb oldCell newCell = [[cell | gbCell <- row,
-                                         let cell = if gbCell == oldCell
-                                                        then newCell
-                                                        else gbCell]
-                                        | row <- gb]
+replaceCell :: Gameboard -> Position -> Cell -> Gameboard
+replaceCell gb posn newCell = replaceCellRow gb (Posn 0 0) posn newCell
+
+replaceCellRow :: Gameboard -> Position -> Position -> Cell -> Gameboard
+replaceCellRow (row:rest) currPosn@(Posn currRow currCol) repPosn@(Posn repRow _) newCell
+    | currRow == repRow = ((replaceCellCol row currPosn repPosn newCell):rest)
+    | otherwise = (row:(replaceCellRow rest (Posn (currRow + 1) currCol) repPosn newCell))
+
+replaceCellCol :: Row -> Position -> Position -> Cell -> Row
+replaceCellCol (col:rest) currPosn@(Posn currRow currCol) repPosn@(Posn _ repCol) newCell
+    | currCol == repCol = (newCell:rest)
+    | otherwise = (col:(replaceCellCol rest (Posn currRow (currCol + 1)) repPosn newCell))
 
 gameSolved :: Gameboard -> Bool
 gameSolved gb = all isAnswer (concat gb)
@@ -41,8 +49,8 @@ getCell gb (Posn row col) = gb !! row !! col
 
 getBox :: Gameboard -> Int -> Int -> Box
 getBox gb boxRow boxCol = [[getCell gb (Posn row col) |
-                                col <- (take 3 [(3*(mod boxCol 3))..])] |
-                                row <- (take 3 [(3*(mod boxRow 3))..])]
+                                col <- (take 3 [(3*(div boxCol 3))..])] |
+                                row <- (take 3 [(3*(div boxRow 3))..])]
 
 getBoxFreeSet :: Box -> FreeSet
 getBoxFreeSet box = sodokuSetComplement boxVals
@@ -55,9 +63,15 @@ getVecFreeSet vec = sodokuSetComplement vecVals
 sodokuSetComplement :: UsedSet -> FreeSet
 sodokuSetComplement usedSet = setComplement [1..9] usedSet
 
+setUnion :: (Eq a) => [a] -> [a] -> [a]
+setUnion set1 set2 = rmdups (set1 ++ set2)
+
 setIntersect :: (Eq a) => [a] -> [a] -> [a]
 setIntersect set1 set2 = [val | val <- set1, elem val set2]
 
 setComplement :: (Eq a) => [a] -> [a] -> [a]
 setComplement universe set = [uniVal | uniVal <- universe,
                                        not (elem uniVal set)]
+rmdups :: (Eq a) => [a] -> [a]
+rmdups [] = []
+rmdups (x:xs) = (x:(rmdups (filter (/= x) xs)))
