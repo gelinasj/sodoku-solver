@@ -8,9 +8,9 @@ Whether you are looking to cut down on the time you spend playing Sudoku, attemp
 
 1. Clone the repository
 2. Updat the `UnsolvedGame.txt` file with your unsolved game
-  * Note: Empty spaces must be represented by '_'
+    * Note: Empty spaces must be represented by the '\_' character
 3. Run `cabal build; cabal run`
-  * Note: You may need to download cabal if not yet installed
+    * Note: You may need to download cabal if not yet installed
 4. Check out the solution in the generated `SolvedGame.txt` file
 
 And there you are, off and away to SudokuStress-less life :)
