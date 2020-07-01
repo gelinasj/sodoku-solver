@@ -18,10 +18,6 @@ strategyWrapper strat =
         (Answer _) -> cell
         (Options _) -> strat gb cell posn)
 
--- onlyChoice :: Strategy
--- onlyChoice gb (Options [answer]) posn = Answer answer
--- onlyChoice gb oldCell posn = oldCell
-
 checkRow :: Strategy
 checkRow gb oldCell posn@(Posn rowNum _) =
     checkVec oldCell (zip row posns) posn

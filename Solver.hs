@@ -39,11 +39,19 @@ determineCorrectOption gb freeSet posn =
     exploreOption 0
     where exploreOption :: Int -> Gameboard
           exploreOption optionIndex =
-              if gameSolved gb'
+              if gameSolved gb' || (optionIndex == ((length freeSet) - 1))
                   then gb'
                   else exploreOption (optionIndex + 1)
               where newCell = Answer (freeSet !! optionIndex)
                     gb' = solve (replaceCell gb posn newCell)
+
+genViewBoard :: [Int] -> Gameboard
+genViewBoard showSet = (first:rest)
+    where showAnswers = map (\val -> Answer val) showSet
+          fill = replicate (9 - (length showSet)) (Answer 0)
+          first = showAnswers ++ fill
+          rest = replicate 8 (replicate 9 (Answer 0))
+
 
 updateFreeSets :: Gameboard -> Gameboard
 updateFreeSets gb = foldl updateFreeSet gb itr
@@ -73,18 +81,18 @@ runStrategies gb = foldl genAnswerIfPossible gb (initIterator gb)
 
 testBoardStr = "\
 \-------------------------------------------\
-\|  _   _   8  |  _   _   _  |  3   _   _  |\
-\|  _   _   _  |  _   1   4  |  _   9   _  |\
-\|  _   _   _  |  _   _   2  |  _   8   4  |\
+\|  3   2   9  |  5   8   4  |  7   1   6  |\
+\|  5   1   6  |  7   9   3  |  2   8   4  |\
+\|  7   4   8  |  2   1   6  |  5   9   3  |\
 \|-----------------------------------------|\
-\|  _   9   2  |  6   _   _  |  _   _   _  |\
-\|  _   7   4  |  _   _   _  |  _   _   _  |\
-\|  1   _   _  |  _   _   _  |  _   3   5  |\
+\|  4   9   1  |  3   6   5  |  8   2   7  |\
+\|  8   5   2  |  4   7   1  |  3   6   9  |\
+\|  6   3   7  |  9   2   8  |  4   5   1  |\
 \|-----------------------------------------|\
-\|  _   6   _  |  5   8   7  |  _   4   _  |\
-\|  _   _   _  |  9   _   _  |  _   _   _  |\
-\|  _   _   _  |  _   4   _  |  5   _   _  |\
-\-------------------------------------------"
+\|  2   8   3  |  1   4   9  |  6   7   5  |\
+\|  9   6   5  |  8   3   7  |  1   4   2  |\
+\|  1   7   4  |  6   5   2  |  9   3   8  |\
+\-------------------------------------------\n"
 
 genTestBoard :: Gameboard
 genTestBoard = parseBoard testBoardStr
