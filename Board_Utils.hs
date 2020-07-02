@@ -14,9 +14,17 @@ module Board_Utils
 , getCellOfOptionSize
 , potentialMoves
 , checkSolution
+, getDiagFreeSet
+, getUlDrDiag
+, getDlUrDiag
+, getUlDrPosns
+, getDlUrPosns
+, isTradGame
 ) where
 import Data.List
 import Sodoku_Lang
+
+isTradGame = True
 
 replaceCell :: Gameboard -> Position -> Cell -> Gameboard
 replaceCell gb posn newCell = replaceCellRow gb (Posn 0 0) posn newCell
@@ -32,14 +40,44 @@ replaceCellCol (col:rest) currPosn@(Posn currRow currCol) repPosn@(Posn _ repCol
     | otherwise = (col:(replaceCellCol rest (Posn currRow (currCol + 1)) repPosn newCell))
 
 checkSolution :: Gameboard -> Bool
-checkSolution gb = all correctlySolvedVecs [0..8]
-    where correctlySolvedVecs :: Int -> Bool
+checkSolution gb =
+    if isTradGame
+        then correctlySolvedTrad
+        else let ulDrDiag = getUlDrDiag gb
+                 dlUrDiag = getDlUrDiag gb
+             in correctlySolvedTrad && (noDups ulDrDiag) && (noDups dlUrDiag)
+    where noDups vec = (length (rmdups vec)) == (length vec)
+          correctlySolvedVecs :: Int -> Bool
           correctlySolvedVecs index =
               (noDups row) && (noDups col) && (noDups box)
               where row = getRow gb index
                     col = getCol gb index
                     box = concat (getBox gb (div index 3) (mod index 3))
-                    noDups vec = (length (rmdups vec)) == (length vec)
+          correctlySolvedTrad = all correctlySolvedVecs [0..8]
+
+getDiagFreeSet :: Gameboard -> Int -> Int -> FreeSet
+getDiagFreeSet gb row col = setIntersect ulDrFreeSet dlUrFreeSet
+    where ulDrFreeSet = getDiagFreeSetGeneric gb row col getUlDrDiag getUlDrPosns
+          dlUrFreeSet = getDiagFreeSetGeneric gb row col getDlUrDiag getDlUrPosns
+
+getDiagFreeSetGeneric :: Gameboard -> Int -> Int -> (Gameboard -> [Cell]) -> [Position] -> FreeSet
+getDiagFreeSetGeneric gb row col getDiag getPosns
+    | onDiag = sodokuSetComplement [val | (Answer val) <- (getDiag gb)]
+    | otherwise = [1..9]
+    where diagPosns = getPosns
+          onDiag = (length (setIntersect [(Posn row col)] diagPosns)) == 1
+
+getUlDrDiag :: Gameboard -> [Cell]
+getUlDrDiag gb = map (getCell gb) getUlDrPosns
+
+getDlUrDiag :: Gameboard -> [Cell]
+getDlUrDiag gb = map (getCell gb) getDlUrPosns
+
+getUlDrPosns :: [Position]
+getUlDrPosns = [(Posn n n) | n <- [0..8]]
+
+getDlUrPosns :: [Position]
+getDlUrPosns = [(Posn row col) | row <- [0..8], let col = (8 - row)]
 
 gameSolved :: Gameboard -> Bool
 gameSolved gb = all isAnswer (concat gb)

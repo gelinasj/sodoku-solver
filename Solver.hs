@@ -62,8 +62,10 @@ updateFreeSets gb = foldl updateFreeSet gb itr
               where rowFreeSet = getVecFreeSet (getRow gb row)
                     colFreeSet = getVecFreeSet (getCol gb col)
                     boxFreeSet = getBoxFreeSet (getBox gb row col)
-                    --updatedFreeSet = rowFreeSet ++ [-1] ++ colFreeSet ++ [-1] ++ boxFreeSet
-                    updatedFreeSet = setIntersect boxFreeSet (setIntersect rowFreeSet colFreeSet)
+                    traditionalFreeSet = setIntersect boxFreeSet (setIntersect rowFreeSet colFreeSet)
+                    updatedFreeSet = if isTradGame
+                        then traditionalFreeSet
+                        else setIntersect traditionalFreeSet (getDiagFreeSet gb row col)
                     newCell = Options updatedFreeSet
           updateFreeSet gbAcc ((Answer freeSet), _) = gbAcc
 

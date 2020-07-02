@@ -1,16 +1,12 @@
 module Strategies
 ( strategies
-, checkRow
-, checkCol
-, checkBox
-, checkVec
-, getNewCell
 ) where
 import Sodoku_Lang
 import Board_Utils
 
 strategies = map strategyWrapper unwrappedStrategies
-unwrappedStrategies = [checkRow, checkCol, checkBox]
+unwrappedStrategies =
+    [checkRow, checkCol, checkBox] ++ if isTradGame then [] else [checkUlDrDiag, checkDlUrDiag]
 
 strategyWrapper :: Strategy -> Strategy
 strategyWrapper strat =
@@ -36,6 +32,21 @@ checkBox gb oldCell posn@(Posn rowNum colNum) =
     where box = concat (getBox gb rowNum colNum)
           posns = [(Posn row col) | row <- (take 3 [(3*(div rowNum 3))..]),
                                     col <- (take 3 [(3*(div colNum 3))..])]
+
+checkUlDrDiag :: Strategy
+checkUlDrDiag gb oldCell posn = checkDiag gb oldCell posn getUlDrDiag getUlDrPosns
+
+checkDlUrDiag :: Strategy
+checkDlUrDiag gb oldCell posn = checkDiag gb oldCell posn getDlUrDiag getDlUrPosns
+
+checkDiag :: Gameboard -> Cell -> Position -> (Gameboard -> [Cell]) -> [Position] -> Cell
+checkDiag gb oldCell posn@(Posn rowNum colNum) getDiag getPosns
+    | onDiag = let diag = getDiag gb
+               in checkVec oldCell (zip diag posns) posn
+    | otherwise = oldCell
+    where posns = getPosns
+          onDiag = (length (setIntersect [posn] posns)) == 1
+
 checkVec :: Cell -> [(Cell, Position)] -> Position -> Cell
 checkVec oldCell vec oldCellPosn = getNewCell oldCell vecFreeSet
     where vecFreeSet = concat [freeVals | ((Options freeVals), posn) <- vec,
